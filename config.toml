@@ -1,0 +1,14 @@
+# project congfiguration
+[project_settings]
+chromer_driver_path = "/usr/bin/chromedrive"
+chrome_path = "/usr/bin/google-chrome"
+batch_size = 5
+
+[folder_config]
+input_dir = "/home/lokeish/Desktop/invoice_data"
+output_dir = "/data/classifier_data/testing"
+temp_dir = "temp_extract"
+
+
+[chatgpt_config]
+prompt = "Extract invoice number, name of the person and date from the text provided in triple backticks. Make sure your response is in json format only. You will be penalised for being verbose so avoid being verbose. Hence simply return json response the key values are invoice_number, name and date, which will be further consumed by python program"
