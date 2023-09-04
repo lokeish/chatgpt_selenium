@@ -12,6 +12,7 @@ class PDFPreProcess(object):
     def __init__(self, config) -> None:
         self.ocr = easyocr.Reader(lang_list=["en"])
         self.config = config['folder_config']
+        self.block_words = ["ledger", "quotation", "timesheet", "time sheet"]
 
     def __get_pdf_as_text(self, pdf_path):
         output_path = self.config['temp_dir']
@@ -64,10 +65,14 @@ class PDFPreProcess(object):
             raise TextCleaningFailure
     
     def extract_text(self, pdf_path):
+        skip = True
         try:
             respone = self.__get_pdf_as_text(pdf_path)
             # clean_text = self.__clean_text(respone)
-            return respone
+            if any(word in respone for word in self.block_words):
+                return "", skip
+             
+            return respone, False
         except:
             raise
 
