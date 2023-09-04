@@ -47,6 +47,7 @@ class DataCleaning(object):
             print("Required Files are moved to destination file")
         except Exception as ex:
             print("Data moving to destination folder failed -%s", str(ex))
+            self.logger.error("Data moving to destination folder failed -%s", str(ex))
             raise FilesFilterFailure
 
     def start_cleaning(self, input_dir, output_dir):

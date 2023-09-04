@@ -1,9 +1,11 @@
 from gpt.chatgpt import ChatGpt
 import os
 import toml
+import shutil
 import logging
 from pdf_handling import pdf_cleaning, pdf_extract, pdf_helper
 from gpt import helper
+from logging.config import fileConfig
 
 # load configuration file
 config = toml.load('config.toml')
@@ -11,25 +13,34 @@ project_config = config['project_settings']
 folder_config = config['folder_config']
 
 # logging configuration
-# logging.config.fileConfig('logging.conf', disable_existing_loggers=False)
+fileConfig('logging.conf', disable_existing_loggers=False)
 
 
 # Required objects
 pdf_clean = pdf_cleaning.DataCleaning(config)
 pdf_ext = pdf_extract.PDFPreProcess(config)
 gpt_helper = helper.GPTHelper(config)
-pdf_helper = pdf_helper.PDFHelper()
+pdf_help = pdf_helper.PDFHelper()
 
 
 def main(input_dir: str, output_dir: str):
+    """Main Function that does 3 things, data cleaning, data extraction, and getting resposne from chatgpt"""
+    
+    failed_conversion_count = 0
+    failed_files_names = []
+    
     # Step -1, Data cleaning
     logging.info("Performing the data/pdf cleaning")
-    # pdf_clean.start_cleaning(input_dir, output_dir='temp_extract')
+    os.makedirs('temp_extract', exist_ok=True)
+    pdf_clean.start_cleaning(input_dir, output_dir='temp_extract')
+
     # Step -2, Extract
     pdf_files = [f for f in os.listdir('temp_extract') if os.path.isfile(os.path.join('temp_extract', f))]
+
     # Step -3, prepare batches
     file_batches = [pdf_files[i:i + project_config['batch_size']] for i in range(0, len(pdf_files), project_config['batch_size'])]
 
+    # Step -4, save pdf to target folder with required changes.
     for fb in file_batches:
         prompt_batch = []
         source_pdf_path_list = []
@@ -41,12 +52,24 @@ def main(input_dir: str, output_dir: str):
             source_pdf_path_list.append(source_pdf_path)
 
         # send prompt in batches to gpt to get invoice details
-        batch_response = gpt_helper.get_response(prompt) if ind%5 == 0 else gpt_helper.get_response(prompt_batch)
+        batch_response = gpt_helper.get_response(prompt_batch)
         # Save pdf to the target folder
-        pdf_helper.save_pdf(batch_response=batch_response, output_dir=output_dir, source_file_path_list=source_pdf_path_list)
-    print("All files are placed in target folder with required names")
+        failed_count, failed_files = pdf_help.save_pdf(batch_response=batch_response, output_dir=output_dir, source_file_path_list=source_pdf_path_list)
+
+        failed_conversion_count += failed_count
+        failed_files_names.append(failed_files)
+
+    # Step-5, Clean the temp folder
+    shutil.rmtree('temp_extract')
+
+    logging.info("All files are placed in target folder with required changes")
+    print("All files are placed in target folder with required changes")
+
+    if len(failed_files) > 0:
+        print("For these files unable to extrac details ->", failed_files)
 
 if __name__ == "__main__":
+
     # Prompt the user for source folder path
     print("Welcome to invoice extract!!!")
     input_dir = input("Enter source folder path (press Enter to use default location): ").strip()

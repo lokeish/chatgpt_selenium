@@ -2,7 +2,7 @@
 [project_settings]
 chromer_driver_path = "/usr/bin/chromedrive"
 chrome_path = "/usr/bin/google-chrome"
-batch_size = 5
+batch_size = 30
 
 [folder_config]
 input_dir = "/home/lokeish/Desktop/invoice_data"

@@ -29,7 +29,6 @@ class GPTHelper(object):
                 response = chat_gpt.return_last_response()
                 output = self.extract_json_from_string(response)
                 batch_response.append(output)
-            print("clean json ---->", output)
             chat_gpt.shutdown()
             return batch_response
         except Exception as ex:

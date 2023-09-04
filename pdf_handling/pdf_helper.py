@@ -1,6 +1,7 @@
 import os  
 import shutil
 import re
+import traceback
 
 class PDFHelper(object):
     def __init__(self) -> None:
@@ -8,16 +9,26 @@ class PDFHelper(object):
 
     def save_pdf(self, batch_response, output_dir, source_file_path_list):
         """Save pdf file in targer folder with invoice id, name of person and date as file name"""
+        failed_count = 0
+        failed_files = []
         try:
             for ind, response in enumerate(batch_response):
-                dt = self.check_keys(response)
-                destination_file_name = f"{dt['name']}_{dt['invoice']}_{dt['date']}.pdf"
-                clean_name = self.clean_string(destination_file_name)
-                destination_file_path = os.path.join(output_dir, clean_name)
-                shutil.copy(source_file_path_list[ind], destination_file_path)
+                try:
+                    dt = self.check_keys(response)
+                    destination_file_name = f"{dt['name']}_{dt['invoice']}_{dt['date']}.pdf"
+                    clean_name = self.clean_string(destination_file_name)
+                    destination_file_path = os.path.join(output_dir, clean_name)
+                    shutil.copy(source_file_path_list[ind], destination_file_path)
+                except Exception as ex:
+                    failed_count += 1
+                    failed_files.append(source_file_path_list[ind])
+                    print(f"Unable to save pdf - {source_file_path_list[ind]}")
 
         except Exception as ex:
-            print("Unable to save pdf in targe folder -", str(ex))
+            print(traceback.format_exc())
+            print("Unable to save pdf in target folder -", str(ex))
+
+        return failed_count, failed_files
 
     def check_keys(self, details):
         s1 = {}
