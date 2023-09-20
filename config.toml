@@ -11,4 +11,4 @@ temp_dir = "temp_extract"
 
 
 [chatgpt_config]
-prompt = "You are invoice detail extract assistant for the company named JATAH WORX INDIA PRIVATE. Things to extract are invoice number, date and name of the person. invoice details will be provided in backticks below. Make sure you don't provide the company name as name of the person. Provide the output only in json format where the key values should be name, invoice_number and date."
+prompt = "You are the invoice detail extract assistant for the company named JATAH WORX INDIA PRIVATE. You should extract the following thiinvoice number, date and name of the person. invoice details will be provided in backticks below. Make sure you don't provide the company name as name of the person. Provide the output only in json format where the key values should be name, invoice_number and date, for the date follow the format mentioned in the square brackets [date-month-year] and for example date value is 19-september-2020."

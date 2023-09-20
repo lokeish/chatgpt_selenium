@@ -31,8 +31,8 @@ def main(input_dir: str, output_dir: str):
     
     # Step -1, Data cleaning
     logging.info("Performing the data/pdf cleaning")
-    # os.makedirs('temp_extract', exist_ok=True)
-    # pdf_clean.start_cleaning(input_dir, output_dir='temp_extract')
+    os.makedirs('temp_extract', exist_ok=True)
+    pdf_clean.start_cleaning(input_dir, output_dir='temp_extract')
 
     # Step -2, Extract
     pdf_files = [f for f in os.listdir('temp_extract') if os.path.isfile(os.path.join('temp_extract', f))]
@@ -54,20 +54,26 @@ def main(input_dir: str, output_dir: str):
 
         # send prompt in batches to gpt to get invoice details
         batch_response = gpt_helper.get_response(prompt_batch)
+
         # Save pdf to the target folder
         failed_count, failed_files = pdf_help.save_pdf(batch_response=batch_response, output_dir=output_dir, source_file_path_list=source_pdf_path_list)
 
         failed_conversion_count += failed_count
         failed_files_names.append(failed_files)
 
-    # # Step-5, Clean the temp folder
-    # shutil.rmtree('temp_extract')
-
     logging.info("All files are placed in target folder with required changes")
     print("All files are placed in target folder with required changes")
 
     if len(failed_files) > 0:
-        print("For these files unable to extrac details ->", failed_files)
+        print("For these files unable to extract details ->", failed_files)
+
+    # Step -5, moved failed files to input dir
+    for file in failed_files:
+        shutil.move(file, input_dir)
+
+    # Step-5, Clean the temp folder
+    shutil.rmtree('temp_extract')
+
 
 if __name__ == "__main__":
 

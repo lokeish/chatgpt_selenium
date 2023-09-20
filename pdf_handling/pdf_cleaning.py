@@ -20,11 +20,17 @@ class DataCleaning(object):
         total_no_files_skipped = 0
         try:
             for filename in os.listdir(source_folder):
-                if filename.endswith(".pdf"):
+                filepath = os.path.join(source_folder, filename)
+                # Exclude directories
+                if os.path.isdir(filepath):
+                    pass
+                # For pdf format
+                elif filename.endswith(".pdf"):
                     pdf_path = os.path.join(source_folder, filename)
                     destination_path = os.path.join(destination_folder, filename)
-                    shutil.copy(pdf_path, destination_path)
+                    shutil.move(pdf_path, destination_path)
                     total_no_files_moved += 1
+                # For Docx format
                 elif filename.endswith('.docx'):
                     docx_path = os.path.join(source_folder, filename)
                     pdf_filename = os.path.splitext(filename)[0] + ".pdf"
@@ -38,6 +44,7 @@ class DataCleaning(object):
                                 docx_path
                               ]
                     subprocess.run(command)
+                    os.remove(docx_path)
                     total_no_files_moved += 1
                 else:
                     total_no_files_skipped += 1

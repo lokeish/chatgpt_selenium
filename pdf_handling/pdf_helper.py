@@ -14,8 +14,10 @@ class PDFHelper(object):
         try:
             for ind, response in enumerate(batch_response):
                 try:
+                    if not response:
+                        raise 
                     dt = self.check_keys(response)
-                    destination_file_name = f"{dt['name']}_{dt['invoice']}_{dt['date']}.pdf"
+                    destination_file_name = f"{dt['date']}_{dt['invoice']}_{dt['name']}.pdf"
                     clean_name = self.clean_string(destination_file_name)
                     destination_file_path = os.path.join(output_dir, clean_name)
                     shutil.copy(source_file_path_list[ind], destination_file_path)
