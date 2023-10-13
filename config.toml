@@ -3,7 +3,9 @@
 chromer_driver_path = "C:\\Progra~1\\chromedriver-win64\\chromedriver.exe"
 chrome_path = "C:\\Progra~1\\Google\\Chrome\\Application\\chrome.exe"
 chrome_data_dir = "C:\\Users\\Ramesh\\Desktop\\chatgpt_selenium\\chrome_data"
+retry_count = 3
 batch_size = 30
+project_source_dir = 'temp_extract'
 
 [folder_config]
 input_dir = "C:\\Users\\Ramesh\\Desktop\\source_dir"

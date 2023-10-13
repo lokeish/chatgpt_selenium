@@ -32,14 +32,25 @@ class GPTHelper(object):
             batch_response = []
             chat_gpt = ChatGpt(self.project_config['chrome_path'], self.project_config['chromer_driver_path'], self.project_config)
             for invoice_data in prompt_batch:
-                prompt = f"""You are an invoice detail extractor assistant for the company named JATAH WORX INDIA PVT LTD, and you should not extract "JATAH WORX INDIA PVT LTD" as the name from the invoice. All the invoices are sent to Jatah Work India PVT LTD. Your task is to extract the name, date, and invoice number from the following invoice data provided in triple backticks ```{invoice_data}```. While extracting names, prioritize the sender's organization name over individual names if present. Extract the date value and convert it to the format "date-month-year," for example, 10-September-2022. Provide the output in JSON format, including keys for date, invoice_number, and name."""
-                try:
-                    chat_gpt.send_prompt_to_chatgpt(prompt)
-                    response = chat_gpt.return_last_response()
-                    output = self.extract_json_from_string(response)
-                    batch_response.append(output)
-                except:
-                    batch_response.append({})
+                curr_count = 0
+                retry_count = self.project_config['retry_count']
+                success_flag = False
+                while curr_count < retry_count:
+                    prompt = f"""You are an invoice detail extractor assistant for the company named JATAH WORX INDIA PVT LTD, and you should not extract "JATAH WORX INDIA PVT LTD" as the name from the invoice. All the invoices are sent to Jatah Work India PVT LTD. Your task is to extract the name, date, and invoice number from the following invoice data provided in triple backticks ```{invoice_data}```. While extracting names, prioritize the sender's organization name over individual names if present. Extract the date value and convert it to the format "date-month-year," for example, 10-September-2022. Provide the output in JSON format, including keys for date, invoice_number, and name."""
+                    try:
+                        chat_gpt.send_prompt_to_chatgpt(prompt)
+                        response = chat_gpt.return_last_response()
+                        output = self.extract_json_from_string(response)
+                        batch_response.append(output)
+                        if "jatah" in output.get('name','').lower():
+                            raise
+                        curr_count = retry_count
+                        success_flag = True
+                    except:
+                        pass
+            if not success_flag:
+                batch_response.append({})
+                
             chat_gpt.shutdown()
             return batch_response
         except Exception as ex:

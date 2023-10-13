@@ -13,6 +13,8 @@ config = toml.load('config.toml')
 project_config = config['project_settings']
 folder_config = config['folder_config']
 
+project_source_dir = project_config['project_source_dir']
+
 # logging configuration
 fileConfig('logging.conf', disable_existing_loggers=False)
 
@@ -32,11 +34,11 @@ def main(input_dir: str, output_dir: str):
     
     # Step -1, Data cleaning
     logging.info("Performing the data/pdf cleaning")
-    os.makedirs('temp_extract', exist_ok=True)
-    pdf_clean.start_cleaning(input_dir, output_dir='temp_extract')
+    os.makedirs(project_source_dir, exist_ok=True)
+    pdf_clean.start_cleaning(input_dir, output_dir=project_source_dir)
 
     # Step -2, Extract
-    pdf_files = [f for f in os.listdir('temp_extract') if os.path.isfile(os.path.join('temp_extract', f))]
+    pdf_files = [f for f in os.listdir(project_source_dir) if os.path.isfile(os.path.join(project_source_dir, f))]
 
     # Step -3, prepare batches
     file_batches = [pdf_files[i:i + project_config['batch_size']] for i in range(0, len(pdf_files), project_config['batch_size'])]
@@ -46,7 +48,7 @@ def main(input_dir: str, output_dir: str):
         prompt_batch = []
         source_pdf_path_list = []
         for ind, pdf in enumerate(fb):
-            source_pdf_path = os.path.join('temp_extract', pdf)
+            source_pdf_path = os.path.join(project_source_dir, pdf)
             # Extract text from pdf
             prompt, skip = pdf_ext.extract_text(source_pdf_path)
             if not skip:
@@ -67,13 +69,21 @@ def main(input_dir: str, output_dir: str):
 
     if len(failed_files) > 0:
         print("For these files unable to extract details ->", failed_files)
+        
+    # Move failed files to source directory
+    if len(failed_files_names) > 0:
+        for file_name in failed_files_names:
+            source_path = os.path.join(project_source_dir, file_name)
+            destination_path = os.path.join(input_dir, file_name)
+            shutil.move(source_path, destination_path)
+            
 
     # Step -5, moved failed files to input dir
     for file in failed_files:
         shutil.move(file, input_dir)
 
     # Step-5, Clean the temp folder
-    shutil.rmtree('temp_extract')
+    shutil.rmtree(project_source_dir)
 
 
 if __name__ == "__main__":
@@ -81,11 +91,13 @@ if __name__ == "__main__":
     # Prompt the user for source folder path
     print("Welcome to invoice extract!!!")
     input_dir = input("Enter source folder path (press Enter to use default location): ").strip()
+    input_dir = input_dir.replace("\\", "\\\\")
     if not input_dir:
         input_dir = folder_config['input_dir']
 
     # Prompt the user for output directory path
     output_dir = input("Enter output directory path (press Enter to use default location): ").strip()
+    output_dir = output_dir.replace("\\", "\\\\")
     if not output_dir:
         output_dir = folder_config['output_dir']
 
