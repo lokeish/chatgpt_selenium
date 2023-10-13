@@ -28,14 +28,19 @@ pdf_help = pdf_helper.PDFHelper()
 
 def main(input_dir: str, output_dir: str):
     """Main Function that does 3 things, data cleaning, data extraction, and getting resposne from chatgpt"""
-    
+    shutil.rmtree(project_source_dir, ignore_errors=True)
     failed_conversion_count = 0
     failed_files_names = []
+    succeded_files = []
     
     # Step -1, Data cleaning
     logging.info("Performing the data/pdf cleaning")
     os.makedirs(project_source_dir, exist_ok=True)
-    pdf_clean.start_cleaning(input_dir, output_dir=project_source_dir)
+    no_files = pdf_clean.start_cleaning(input_dir, output_dir=project_source_dir)
+
+    if no_files < 1:
+        print("No Files/Proper Files are present at source dir !!!")
+        sys.exit()
 
     # Step -2, Extract
     pdf_files = [f for f in os.listdir(project_source_dir) if os.path.isfile(os.path.join(project_source_dir, f))]
@@ -59,31 +64,32 @@ def main(input_dir: str, output_dir: str):
         batch_response = gpt_helper.get_response(prompt_batch)
 
         # Save pdf to the target folder
-        failed_count, failed_files = pdf_help.save_pdf(batch_response=batch_response, output_dir=output_dir, source_file_path_list=source_pdf_path_list)
+        failed_count, failed_files, success_files = pdf_help.save_pdf(batch_response=batch_response, output_dir=output_dir, source_file_path_list=source_pdf_path_list)
 
         failed_conversion_count += failed_count
         failed_files_names.append(failed_files)
+        succeded_files.append(success_files)
 
-    logging.info("All files are placed in target folder with required changes")
-    print("All files are placed in target folder with required changes")
 
     if len(failed_files) > 0:
-        print("For these files unable to extract details ->", failed_files)
-        
-    # Move failed files to source directory
-    if len(failed_files_names) > 0:
-        for file_name in failed_files_names:
-            source_path = os.path.join(project_source_dir, file_name)
-            destination_path = os.path.join(input_dir, file_name)
-            shutil.move(source_path, destination_path)
-            
+        print("For these files, unable to extract details ->", failed_files)
 
-    # Step -5, moved failed files to input dir
-    for file in failed_files:
-        shutil.move(file, input_dir)
+
+        
+    # Delete Succeded files from source directory
+    if len(succeded_files) > 0:
+        for file_names in succeded_files:
+            if len(file_names) > 0:
+                for file_name in file_names:
+                    file_n = file_name.split(project_config['split_char'])[-1]
+                    source_path = os.path.join(input_dir, file_n)
+                    os.remove(source_path)
 
     # Step-5, Clean the temp folder
     shutil.rmtree(project_source_dir)
+
+    logging.info("All files are placed in target folder with required changes")
+    print("All files are placed in target folder with required changes")
 
 
 if __name__ == "__main__":

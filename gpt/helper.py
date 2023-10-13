@@ -2,6 +2,7 @@ import logging
 from .chatgpt import ChatGpt
 import traceback
 import json
+from exceptions import IncorrectExtraction
 
 class GPTHelper(object):
     def __init__(self, config) -> None:
@@ -36,17 +37,18 @@ class GPTHelper(object):
                 retry_count = self.project_config['retry_count']
                 success_flag = False
                 while curr_count < retry_count:
-                    prompt = f"""You are an invoice detail extractor assistant for the company named JATAH WORX INDIA PVT LTD, and you should not extract "JATAH WORX INDIA PVT LTD" as the name from the invoice. All the invoices are sent to Jatah Work India PVT LTD. Your task is to extract the name, date, and invoice number from the following invoice data provided in triple backticks ```{invoice_data}```. While extracting names, prioritize the sender's organization name over individual names if present. Extract the date value and convert it to the format "date-month-year," for example, 10-September-2022. Provide the output in JSON format, including keys for date, invoice_number, and name."""
+                    prompt = f"""You are an invoice detail extractor assistant for the company named JATAH WORX INDIA PVT LTD, and you should not extract "JATAH WORX INDIA PVT LTD" or "NEUTRINOS Technologies" as the name from the invoice. All the invoices are sent to Jatah Work India PVT LTD. Your task is to extract the name, date, and invoice number from the following invoice data provided in triple backticks ```{invoice_data}```. {"While extracting names, prioritize the sender's organization name over individual names if present." if retry_count > 1 else ""}. Extract the date value and convert it to the format "date-month-year," for example, 10-September-2022. Provide the output in JSON format only without being verbose, including keys for date, invoice_number, and name."""
                     try:
                         chat_gpt.send_prompt_to_chatgpt(prompt)
                         response = chat_gpt.return_last_response()
                         output = self.extract_json_from_string(response)
-                        batch_response.append(output)
-                        if "jatah" in output.get('name','').lower():
-                            raise
+                        if "jatah"  in output.get('name','').lower() or "neutrinos" in output.get('name', '').lower():
+                            raise IncorrectExtraction
                         curr_count = retry_count
                         success_flag = True
+                        batch_response.append(output)
                     except:
+                        curr_count += 1
                         pass
             if not success_flag:
                 batch_response.append({})

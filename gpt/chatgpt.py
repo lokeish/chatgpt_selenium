@@ -43,7 +43,7 @@ class ChatGpt(object):
             input_box.send_keys(prompt)
             time.sleep(5)
             input_box.send_keys(Keys.RETURN)
-            time.sleep(5)
+            time.sleep(10)
         except:
             print(traceback.format_exc())
 

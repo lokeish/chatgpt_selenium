@@ -2,6 +2,7 @@ import os
 import shutil
 import re
 import traceback
+from exceptions import IncorrectExtraction
 
 class PDFHelper(object):
     def __init__(self) -> None:
@@ -11,16 +12,23 @@ class PDFHelper(object):
         """Save pdf file in targer folder with invoice id, name of person and date as file name"""
         failed_count = 0
         failed_files = []
+        success_files = []
         try:
             for ind, response in enumerate(batch_response):
                 try:
                     if not response:
-                        raise 
+                        raise IncorrectExtraction
+                    for k, v in response.items():
+                        if len(v) < 1 or v is None:
+                            raise IncorrectExtraction
                     dt = self.check_keys(response)
                     destination_file_name = f"{dt['date']}_{dt['invoice']}_{dt['name']}.pdf"
                     clean_name = self.clean_string(destination_file_name)
+                    if "jatah"  in clean_name.lower() or "neutrinos" in clean_name.lower():
+                        raise IncorrectExtraction
                     destination_file_path = os.path.join(output_dir, clean_name)
                     shutil.copy(source_file_path_list[ind], destination_file_path)
+                    success_files.append(source_file_path_list[ind])
                 except Exception as ex:
                     failed_count += 1
                     failed_files.append(source_file_path_list[ind])
@@ -30,7 +38,7 @@ class PDFHelper(object):
             print(traceback.format_exc())
             print("Unable to save pdf in target folder -", str(ex))
 
-        return failed_count, failed_files
+        return failed_count, failed_files, success_files
 
     def check_keys(self, details):
         s1 = {}

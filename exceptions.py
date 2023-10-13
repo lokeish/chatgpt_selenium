@@ -13,3 +13,7 @@ class OcrFailure(Exception):
 class TextCleaningFailure(Exception):
     """Raised when text cleaning fails"""
     pass
+
+class IncorrectExtraction(Exception):
+    """Raised for incorrect extraction"""
+    pass

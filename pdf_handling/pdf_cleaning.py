@@ -28,7 +28,7 @@ class DataCleaning(object):
                 elif filename.endswith(".pdf"):
                     pdf_path = os.path.join(source_folder, filename)
                     destination_path = os.path.join(destination_folder, filename)
-                    shutil.move(pdf_path, destination_path)
+                    shutil.copy(pdf_path, destination_path)
                     total_no_files_moved += 1
                 # For Docx format
                 elif filename.endswith('.docx'):
@@ -51,18 +51,22 @@ class DataCleaning(object):
                     print("Skipping file -", filename)
             print("Total no of files moved -", total_no_files_moved)
             print("Total no of files skipped -", total_no_files_skipped)
-            print("Required Files are moved to destination file")
+            print("Required Files are moved to the temp folder for processing")
         except Exception as ex:
             print("Data moving to destination folder failed -%s", str(ex))
             self.logger.error("Data moving to destination folder failed -%s", str(ex))
             raise FilesFilterFailure
 
+        return total_no_files_moved
+
     def start_cleaning(self, input_dir, output_dir):
         """main function that start files cleaning on pdf source folder"""
+        no_of_files = 0
         try:
-            self.__filter_files(input_dir, output_dir)
+            no_of_files = self.__filter_files(input_dir, output_dir)
         except:
             raise
+        return no_of_files
 
 # For individual class testing purpose
 # if __name__ == "__main__":
