@@ -36,15 +36,16 @@ class DataCleaning(object):
                     pdf_filename = os.path.splitext(filename)[0] + ".pdf"
                     pdf_path = os.path.join(destination_folder, pdf_filename)
                     # Convert docx to pdf format
+                    libreoffice_path = r"C:\Program Files\LibreOffice\program\soffice.exe"
                     command = [
-                                "libreoffice",
+                                libreoffice_path,
                                 "--headless",
                                 "--convert-to", "pdf",
                                 "--outdir", destination_folder,
                                 docx_path
                               ]
-                    subprocess.run(command)
-                    os.remove(docx_path)
+                    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = process.communicate()
                     total_no_files_moved += 1
                 else:
                     total_no_files_skipped += 1

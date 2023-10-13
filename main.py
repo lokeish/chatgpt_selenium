@@ -83,7 +83,10 @@ def main(input_dir: str, output_dir: str):
                 for file_name in file_names:
                     file_n = file_name.split(project_config['split_char'])[-1]
                     source_path = os.path.join(input_dir, file_n)
-                    os.remove(source_path)
+                    try:
+                        os.remove(source_path)
+                    except:
+                        pass
 
     # Step-5, Clean the temp folder
     shutil.rmtree(project_source_dir)
