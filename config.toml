@@ -1,12 +1,13 @@
 # project congfiguration
 [project_settings]
-chromer_driver_path = "/usr/bin/chromedrive"
-chrome_path = "/usr/bin/google-chrome"
+chromer_driver_path = "C:\\Progra~1\\chromedriver-win64\\chromedriver.exe"
+chrome_path = "C:\\Progra~1\\Google\\Chrome\\Application\\chrome.exe"
+chrome_data_dir = "C:\\Users\\Ramesh\\Desktop\\chatgpt_selenium\\chrome_data"
 batch_size = 30
 
 [folder_config]
-input_dir = "/home/lokeish/Desktop/invoice_data"
-output_dir = "/data/classifier_data/testing"
+input_dir = "C:\\Users\\Ramesh\\Desktop\\source_dir"
+output_dir = "C:\\Users\\Ramesh\\Desktop\\dest_dir"
 temp_dir = "temp_extract"
 
 

@@ -24,9 +24,10 @@ class ChatGpt(object):
     textarea_tq = 'textarea'
     textarea_iq = 'prompt-textarea'
     gpt_xq    = '//span[text()="{}"]'
-    def __init__(self, chrome_path, chrome_driver_path) -> None:
+    def __init__(self, chrome_path, chrome_driver_path, project_config) -> None:
         self.chrome_path = chrome_path
         self.chrome_driver_path = chrome_driver_path
+        self.project_config = project_config
         chatgpt_url = "https://chat.openai.com"
         # Get free port
         port = self.find_available_port()
@@ -93,7 +94,7 @@ class ChatGpt(object):
         """  Initializes a Selenium WebDriver instance, connected to an existing Chrome browser
              with remote debugging enabled on the specified port"""
 
-        service = Service(executable_path='/usr/bin/chromedriver')
+        service = Service(executable_path=self.chrome_driver_path)
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_experimental_option("debuggerAddress", f"127.0.0.1:{port}")
         driver = webdriver.Chrome(service=service, options=chrome_options)
@@ -105,7 +106,8 @@ class ChatGpt(object):
             provided url """
 
         def open_chrome():
-            chrome_cmd = f"{self.chrome_path} --remote-debugging-port={port} --user-data-dir=remote-profile {url}"
+            data_path = self.project_config['chrome_data_dir']
+            chrome_cmd = f"{self.chrome_path} --remote-debugging-port={port} --user-data-dir={data_path} {url}"
             os.system(chrome_cmd)
 
         chrome_thread = threading.Thread(target=open_chrome)

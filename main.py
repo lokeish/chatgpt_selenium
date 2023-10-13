@@ -6,6 +6,7 @@ import logging
 from pdf_handling import pdf_cleaning, pdf_extract, pdf_helper
 from gpt import helper
 from logging.config import fileConfig
+import sys
 
 # load configuration file
 config = toml.load('config.toml')
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     # Validate if the paths exist
     if not os.path.exists(input_dir):
         print(f"Source folder '{input_dir}' does not exist.")
-        os._exit()
+        sys.exit()
 
     # Ensure the output directory exists or create it
     if not os.path.exists(output_dir):
