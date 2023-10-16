@@ -50,8 +50,8 @@ class DataCleaning(object):
                 else:
                     total_no_files_skipped += 1
                     print("Skipping file -", filename)
-            print("Total no of files moved -", total_no_files_moved)
-            print("Total no of files skipped -", total_no_files_skipped)
+            print("Total no of files proccessing -", total_no_files_moved)
+            print("Total no of files skipped from processing -", total_no_files_skipped)
             print("Required Files are moved to the temp folder for processing")
         except Exception as ex:
             print("Data moving to destination folder failed -%s", str(ex))
