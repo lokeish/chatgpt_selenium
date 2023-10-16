@@ -2,7 +2,7 @@ import os
 import shutil
 import re
 import traceback
-from exceptions import IncorrectExtraction
+from proj_exceptions import IncorrectExtraction
 
 class PDFHelper(object):
     def __init__(self) -> None:

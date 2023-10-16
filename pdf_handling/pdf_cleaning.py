@@ -3,7 +3,7 @@ import os
 import subprocess
 import shutil
 import logging
-from exceptions import FilesFilterFailure
+from proj_exceptions import FilesFilterFailure
 
 class DataCleaning(object):
     def __init__(self, config) -> None:
@@ -33,6 +33,7 @@ class DataCleaning(object):
                 # For Docx format
                 elif filename.endswith('.docx'):
                     docx_path = os.path.join(source_folder, filename)
+                    docx_path = os.path.normpath(docx_path)
                     pdf_filename = os.path.splitext(filename)[0] + ".pdf"
                     pdf_path = os.path.join(destination_folder, pdf_filename)
                     # Convert docx to pdf format

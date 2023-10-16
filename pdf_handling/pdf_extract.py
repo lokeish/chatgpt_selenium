@@ -5,7 +5,7 @@ import traceback
 import os
 import uuid
 import re
-from exceptions import OcrFailure, TextCleaningFailure
+from proj_exceptions import OcrFailure, TextCleaningFailure
 
 class PDFPreProcess(object):
 

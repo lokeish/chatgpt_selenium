@@ -71,7 +71,7 @@ def main(input_dir: str, output_dir: str):
         succeded_files.append(success_files)
 
 
-    if len(failed_files) > 0:
+    if len(failed_files_names) > 0:
         print("For these files, unable to extract details ->", failed_files)
 
 
@@ -82,9 +82,12 @@ def main(input_dir: str, output_dir: str):
             if len(file_names) > 0:
                 for file_name in file_names:
                     file_n = file_name.split(project_config['split_char'])[-1]
+                    doc_file_n = file_n.split('.')[0] + '.docx'
                     source_path = os.path.join(input_dir, file_n)
                     try:
                         os.remove(source_path)
+                    except FileNotFoundError:
+                        os.remove(os.path.join(input_dir, doc_file_n))
                     except:
                         pass
 
